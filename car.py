@@ -8,18 +8,6 @@ from io import StringIO
 st.set_page_config(page_title="Análise Forscan Lite", layout="wide")
 st.title("🚘 Análise de Viagem - Forscan Lite")
 
-# ======= UPLOAD E PROCESSAMENTO =======
-uploaded_file = st.file_uploader("Selecione o arquivo CSV exportado do Forscan Lite", type=["csv"])
-
-if uploaded_file is not None:
-    df = pd.read_csv(uploaded_file, sep=";", encoding="utf-8")
-    
-    # Mostrar colunas e primeiras linhas somente após carregar o CSV
-    st.write("Colunas detectadas:", df.columns.tolist())
-    st.write(df.head())
-
-    df = processar_dados(df)
-
 
 def processar_dados(df):
     import streamlit as st
@@ -55,6 +43,17 @@ def processar_dados(df):
         st.error(f"Erro durante o processamento dos dados: {e}")
         st.stop()
 
+# ======= UPLOAD E PROCESSAMENTO =======
+uploaded_file = st.file_uploader("Selecione o arquivo CSV exportado do Forscan Lite", type=["csv"])
+
+if uploaded_file is not None:
+    df = pd.read_csv(uploaded_file, sep=";", encoding="utf-8")
+    
+    # Mostrar colunas e primeiras linhas somente após carregar o CSV
+    st.write("Colunas detectadas:", df.columns.tolist())
+    st.write(df.head())
+
+    df = processar_dados(df)
 
 # ======= DICIONÁRIO DE DESCRIÇÃO DAS COLUNAS =======
 descricao_colunas = {
