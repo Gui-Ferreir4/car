@@ -9,7 +9,11 @@ st.set_page_config(page_title="Análise Forscan Lite", layout="wide")
 st.title("🚘 Análise de Viagem - Forscan Lite")
 
 # ======= UPLOAD E PROCESSAMENTO =======
-uploaded_file = st.file_uploader("📥 Envie o arquivo CSV gerado pelo Forscan Lite", type=["csv"])
+uploaded_file = st.file_uploader("Selecione o arquivo CSV exportado do Forscan Lite", type=["csv"])
+
+if uploaded_file is not None:
+    df = pd.read_csv(uploaded_file, sep=";", encoding="utf-8")
+    df = processar_dados(df)
 
 def converter_tempo(ms):
     """Converte milissegundos para formato HH:MM:SS"""
