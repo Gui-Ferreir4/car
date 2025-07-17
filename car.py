@@ -4,6 +4,7 @@ import pandas as pd
 from datetime import timedelta
 from io import StringIO
 
+
 st.set_page_config(page_title="Análise Forscan Lite", layout="wide")
 st.title("🚘 Análise de Viagem - Forscan Lite")
 
@@ -11,13 +12,25 @@ st.title("🚘 Análise de Viagem - Forscan Lite")
 uploaded_file = st.file_uploader("📥 Envie o arquivo CSV gerado pelo Forscan Lite", type=["csv"])
 
 def converter_tempo(ms):
+    """Converte milissegundos para formato HH:MM:SS"""
     try:
-        return str(timedelta(milliseconds=int(ms)))
+        segundos = int(ms) // 1000
+        return str(timedelta(seconds=segundos))
     except:
-        return None
+        return "Inválido"
 
 def processar_dados(df):
-    df["TIME_CONVERTED"] = df["time(ms)"].apply(converter_tempo)
+    # Limpa os nomes das colunas para remover espaços e caracteres estranhos
+    df.columns = df.columns.str.strip().str.replace("\uFFFD", "", regex=True)
+
+    # Verifica se a coluna 'time(ms)' está presente
+    col_tempo = "time(ms)"
+    if col_tempo not in df.columns:
+        st.error(f"❌ Coluna '{col_tempo}' não encontrada no arquivo CSV.\n\nColunas disponíveis: {df.columns.tolist()}")
+        st.stop()
+
+    # Converte tempo para HH:MM:SS
+    df["TIME_CONVERTED"] = df[col_tempo].apply(converter_tempo)
     df["ENGI_IDLE"] = df["ENGI_IDLE"].fillna(0).astype(int)
     df["ACTIVE"] = df["ENGI_IDLE"].apply(lambda x: 0 if x == 1 else 1)
     return df
