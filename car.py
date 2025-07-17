@@ -20,13 +20,6 @@ if uploaded_file is not None:
 
     df = processar_dados(df)
 
-def converter_tempo(ms):
-    """Converte milissegundos para formato HH:MM:SS"""
-    try:
-        segundos = int(ms) // 1000
-        return str(timedelta(seconds=segundos))
-    except:
-        return "Inválido"
 
 def processar_dados(df):
     import streamlit as st
