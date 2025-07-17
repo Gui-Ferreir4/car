@@ -29,22 +29,39 @@ def converter_tempo(ms):
         return "Inválido"
 
 def processar_dados(df):
+    import streamlit as st
+    from datetime import timedelta
+
+    def converter_tempo(ms):
+        try:
+            segundos = int(ms) // 1000
+            return str(timedelta(seconds=segundos))
+        except:
+            return "Inválido"
+
     try:
+        # Remove espaços em colunas e caracteres estranhos
         df.columns = df.columns.str.strip().str.replace("\uFFFD", "", regex=True)
-        
-        col_tempo = "time(ms)"
-        if col_tempo not in df.columns:
-            st.error(f"❌ Coluna '{col_tempo}' não encontrada no arquivo CSV.\nColunas disponíveis: {df.columns.tolist()}")
+
+        if "time(ms)" not in df.columns:
+            st.error(f"Coluna 'time(ms)' não encontrada no CSV.\nColunas encontradas: {df.columns.tolist()}")
             st.stop()
 
-        df["TIME_CONVERTED"] = df[col_tempo].apply(converter_tempo)
+        df["TIME_CONVERTED"] = df["time(ms)"].apply(converter_tempo)
+
+        if "ENGI_IDLE" not in df.columns:
+            st.error(f"Coluna 'ENGI_IDLE' não encontrada no CSV.\nColunas encontradas: {df.columns.tolist()}")
+            st.stop()
+
         df["ENGI_IDLE"] = df["ENGI_IDLE"].fillna(0).astype(int)
         df["ACTIVE"] = df["ENGI_IDLE"].apply(lambda x: 0 if x == 1 else 1)
+
         return df
 
     except Exception as e:
-        st.error(f"Erro ao processar dados: {e}")
+        st.error(f"Erro durante o processamento dos dados: {e}")
         st.stop()
+
 
 # ======= DICIONÁRIO DE DESCRIÇÃO DAS COLUNAS =======
 descricao_colunas = {
