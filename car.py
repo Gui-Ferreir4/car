@@ -31,15 +31,15 @@ def processar_dados(df):
 
 st.title("Análise Forscan Lite")
 
-uploaded_file = st.file_uploader("Selecione o arquivo CSV exportado do Forscan Lite", type=["csv"])
+uploaded_file = st.file_uploader("Envie o arquivo CSV", type=["csv"])
 
 if uploaded_file is not None:
-    df = pd.read_csv(uploaded_file, sep=";", encoding="utf-8")
-
-    st.write("Colunas detectadas:", df.columns.tolist())
-    st.write(df.head())
-
-    df = processar_dados(df)
+    try:
+        df = pd.read_csv(uploaded_file, sep=";", encoding="latin1")
+        st.write("Colunas detectadas:", df.columns.tolist())
+        st.write(df.head())
+    except Exception as e:
+        st.error(f"Erro ao ler o arquivo CSV: {e}")
 
 # ======= DICIONÁRIO DE DESCRIÇÃO DAS COLUNAS =======
 descricao_colunas = {
