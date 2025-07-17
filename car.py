@@ -11,12 +11,12 @@ st.title("🚘 Análise de Viagem - Forscan Lite")
 # ======= UPLOAD E PROCESSAMENTO =======
 uploaded_file = st.file_uploader("Selecione o arquivo CSV exportado do Forscan Lite", type=["csv"])
 
+st.write("Colunas detectadas:", df.columns.tolist())
+st.write(df.head())
+
 if uploaded_file is not None:
     df = pd.read_csv(uploaded_file, sep=";", encoding="utf-8")
     df = processar_dados(df)
-
-st.write("Colunas detectadas:", df.columns.tolist())
-st.write(df.head())
 
 def converter_tempo(ms):
     """Converte milissegundos para formato HH:MM:SS"""
