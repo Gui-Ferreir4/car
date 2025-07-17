@@ -2,54 +2,39 @@
 import streamlit as st
 import pandas as pd
 from datetime import timedelta
-from io import StringIO
 
-
-st.set_page_config(page_title="Análise Forscan Lite", layout="wide")
-st.title("🚘 Análise de Viagem - Forscan Lite")
-
+def converter_tempo(ms):
+    try:
+        segundos = int(ms) // 1000
+        return str(timedelta(seconds=segundos))
+    except:
+        return "Inválido"
 
 def processar_dados(df):
-    import streamlit as st
-    from datetime import timedelta
+    df.columns = df.columns.str.strip().str.replace("\uFFFD", "", regex=True)
 
-    def converter_tempo(ms):
-        try:
-            segundos = int(ms) // 1000
-            return str(timedelta(seconds=segundos))
-        except:
-            return "Inválido"
-
-    try:
-        # Remove espaços em colunas e caracteres estranhos
-        df.columns = df.columns.str.strip().str.replace("\uFFFD", "", regex=True)
-
-        if "time(ms)" not in df.columns:
-            st.error(f"Coluna 'time(ms)' não encontrada no CSV.\nColunas encontradas: {df.columns.tolist()}")
-            st.stop()
-
-        df["TIME_CONVERTED"] = df["time(ms)"].apply(converter_tempo)
-
-        if "ENGI_IDLE" not in df.columns:
-            st.error(f"Coluna 'ENGI_IDLE' não encontrada no CSV.\nColunas encontradas: {df.columns.tolist()}")
-            st.stop()
-
-        df["ENGI_IDLE"] = df["ENGI_IDLE"].fillna(0).astype(int)
-        df["ACTIVE"] = df["ENGI_IDLE"].apply(lambda x: 0 if x == 1 else 1)
-
-        return df
-
-    except Exception as e:
-        st.error(f"Erro durante o processamento dos dados: {e}")
+    if "time(ms)" not in df.columns:
+        st.error(f"Coluna 'time(ms)' não encontrada no CSV.\nColunas encontradas: {df.columns.tolist()}")
         st.stop()
 
-# ======= UPLOAD E PROCESSAMENTO =======
+    df["TIME_CONVERTED"] = df["time(ms)"].apply(converter_tempo)
+
+    if "ENGI_IDLE" not in df.columns:
+        st.error(f"Coluna 'ENGI_IDLE' não encontrada no CSV.\nColunas encontradas: {df.columns.tolist()}")
+        st.stop()
+
+    df["ENGI_IDLE"] = df["ENGI_IDLE"].fillna(0).astype(int)
+    df["ACTIVE"] = df["ENGI_IDLE"].apply(lambda x: 0 if x == 1 else 1)
+
+    return df
+
+st.title("Análise Forscan Lite")
+
 uploaded_file = st.file_uploader("Selecione o arquivo CSV exportado do Forscan Lite", type=["csv"])
 
 if uploaded_file is not None:
     df = pd.read_csv(uploaded_file, sep=";", encoding="utf-8")
-    
-    # Mostrar colunas e primeiras linhas somente após carregar o CSV
+
     st.write("Colunas detectadas:", df.columns.tolist())
     st.write(df.head())
 
