@@ -23,7 +23,8 @@ def processar_dados(df):
         st.error(f"Coluna 'ENGI_IDLE' não encontrada no CSV.\nColunas encontradas: {df.columns.tolist()}")
         st.stop()
 
-    df["ENGI_IDLE"] = df["ENGI_IDLE"].fillna(0).astype(int)
+    map_idle = {"Sim": 1, "Não": 0, "Nao": 0}
+    df["ENGI_IDLE"] = df["ENGI_IDLE"].map(map_idle).fillna(0).astype(int)
     df["ACTIVE"] = df["ENGI_IDLE"].apply(lambda x: 0 if x == 1 else 1)
 
     return df
