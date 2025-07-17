@@ -15,6 +15,9 @@ if uploaded_file is not None:
     df = pd.read_csv(uploaded_file, sep=";", encoding="utf-8")
     df = processar_dados(df)
 
+st.write("Colunas detectadas:", df.columns.tolist())
+st.write(df.head())
+
 def converter_tempo(ms):
     """Converte milissegundos para formato HH:MM:SS"""
     try:
@@ -24,20 +27,22 @@ def converter_tempo(ms):
         return "Inválido"
 
 def processar_dados(df):
-    # Limpa os nomes das colunas para remover espaços e caracteres estranhos
-    df.columns = df.columns.str.strip().str.replace("\uFFFD", "", regex=True)
+    try:
+        df.columns = df.columns.str.strip().str.replace("\uFFFD", "", regex=True)
+        
+        col_tempo = "time(ms)"
+        if col_tempo not in df.columns:
+            st.error(f"❌ Coluna '{col_tempo}' não encontrada no arquivo CSV.\nColunas disponíveis: {df.columns.tolist()}")
+            st.stop()
 
-    # Verifica se a coluna 'time(ms)' está presente
-    col_tempo = "time(ms)"
-    if col_tempo not in df.columns:
-        st.error(f"❌ Coluna '{col_tempo}' não encontrada no arquivo CSV.\n\nColunas disponíveis: {df.columns.tolist()}")
+        df["TIME_CONVERTED"] = df[col_tempo].apply(converter_tempo)
+        df["ENGI_IDLE"] = df["ENGI_IDLE"].fillna(0).astype(int)
+        df["ACTIVE"] = df["ENGI_IDLE"].apply(lambda x: 0 if x == 1 else 1)
+        return df
+
+    except Exception as e:
+        st.error(f"Erro ao processar dados: {e}")
         st.stop()
-
-    # Converte tempo para HH:MM:SS
-    df["TIME_CONVERTED"] = df[col_tempo].apply(converter_tempo)
-    df["ENGI_IDLE"] = df["ENGI_IDLE"].fillna(0).astype(int)
-    df["ACTIVE"] = df["ENGI_IDLE"].apply(lambda x: 0 if x == 1 else 1)
-    return df
 
 # ======= DICIONÁRIO DE DESCRIÇÃO DAS COLUNAS =======
 descricao_colunas = {
