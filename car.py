@@ -3,7 +3,10 @@ import streamlit as st
 import pandas as pd
 from datetime import timedelta
 
+st.title("Análise Forscan Lite - Consumo e Desempenho")
+
 def converter_tempo(ms):
+    """Converte milissegundos para HH:MM:SS"""
     try:
         segundos = int(ms) // 1000
         return str(timedelta(seconds=segundos))
@@ -11,38 +14,44 @@ def converter_tempo(ms):
         return "Inválido"
 
 def processar_dados(df):
+    # Limpa espaços e caracteres estranhos das colunas
     df.columns = df.columns.str.strip().str.replace("\uFFFD", "", regex=True)
 
+    # Verifica coluna de tempo
     if "time(ms)" not in df.columns:
-        st.error(f"Coluna 'time(ms)' não encontrada no CSV.\nColunas encontradas: {df.columns.tolist()}")
+        st.error(f"Coluna 'time(ms)' não encontrada. Colunas disponíveis: {df.columns.tolist()}")
         st.stop()
-
     df["TIME_CONVERTED"] = df["time(ms)"].apply(converter_tempo)
 
+    # Verifica coluna ENGI_IDLE
     if "ENGI_IDLE" not in df.columns:
-        st.error(f"Coluna 'ENGI_IDLE' não encontrada no CSV.\nColunas encontradas: {df.columns.tolist()}")
+        st.error(f"Coluna 'ENGI_IDLE' não encontrada. Colunas disponíveis: {df.columns.tolist()}")
         st.stop()
 
+    # Mapeia "Sim" -> 1, "Não" -> 0
     map_idle = {"Sim": 1, "Não": 0, "Nao": 0}
     df["ENGI_IDLE"] = df["ENGI_IDLE"].map(map_idle).fillna(0).astype(int)
+
+    # Cria coluna ACTIVE: 0 se marcha lenta ligada, 1 se desligada
     df["ACTIVE"] = df["ENGI_IDLE"].apply(lambda x: 0 if x == 1 else 1)
 
     return df
 
-st.title("Análise Forscan Lite")
-
-uploaded_file = st.file_uploader("Selecione o CSV", type=["csv"])
+uploaded_file = st.file_uploader("Selecione o arquivo CSV exportado do Forscan Lite", type=["csv"])
 
 if uploaded_file is not None:
-    # Primeira leitura
     uploaded_file.seek(0)
-    df = pd.read_csv(uploaded_file, sep=";", encoding="utf-8")
-    st.write(df.head())
+    try:
+        df = pd.read_csv(uploaded_file, sep=";", encoding="utf-8")
+        st.write("Colunas detectadas:", df.columns.tolist())
+        st.write(df.head())
 
-    # Se precisar ler novamente, resetar o ponteiro
-    uploaded_file.seek(0)
-    df2 = pd.read_csv(uploaded_file, sep=";", encoding="utf-8")
+        df = processar_dados(df)
+        st.write("Dados após processamento:")
+        st.write(df[["time(ms)", "TIME_CONVERTED", "ENGI_IDLE", "ACTIVE"]].head())
 
+    except Exception as e:
+        st.error(f"Erro ao ler ou processar o arquivo CSV: {e}")
 # ======= DICIONÁRIO DE DESCRIÇÃO DAS COLUNAS =======
 descricao_colunas = {
     "time(ms)": "Tempo desde o início da gravação (ms)",
