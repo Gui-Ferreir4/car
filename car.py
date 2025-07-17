@@ -34,13 +34,14 @@ st.title("Análise Forscan Lite")
 uploaded_file = st.file_uploader("Selecione o CSV", type=["csv"])
 
 if uploaded_file is not None:
+    # Primeira leitura
     uploaded_file.seek(0)
-    try:
-        df = pd.read_csv(uploaded_file, sep=";", encoding="utf-8")
-        st.write("Colunas detectadas:", df.columns.tolist())
-        st.write(df.head())
-    except Exception as e:
-        st.error(f"Erro ao ler CSV: {e}")
+    df = pd.read_csv(uploaded_file, sep=";", encoding="utf-8")
+    st.write(df.head())
+
+    # Se precisar ler novamente, resetar o ponteiro
+    uploaded_file.seek(0)
+    df2 = pd.read_csv(uploaded_file, sep=";", encoding="utf-8")
 
 # ======= DICIONÁRIO DE DESCRIÇÃO DAS COLUNAS =======
 descricao_colunas = {
