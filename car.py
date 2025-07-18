@@ -66,44 +66,7 @@ def processar_dados(df):
             df[col] = pd.to_numeric(df[col], errors="coerce")
 
     return df
-Isso garante que as colunas usadas em subtrações e médias sejam tratadas como números (float64) — evitando o erro de subtração de strings.
 
-✅ Depois disso, rode novamente. Se der erro novo, me avise. Caso rode corretamente, posso te ajudar a:
-identificar as viagens no log
-
-calcular consumo por trecho
-
-refinar alertas e gerar insights mais inteligentes
-
-Tudo diretamente com base na sua planilha Forscan.
-
-
-
-
-
-
-
-Você disse:
-lembre-se que nas linhas iniciais, algumas colunas podem estar preenchidas com -
-
-
-O ChatGPT disse:
-Você está dando feedback sobre uma nova versão do ChatGPT.
-Qual resposta você prefere? Elas podem demorar um pouco para carregar.
-ChatGPT
-Resposta 1
-Ótimo lembrete. Quando o CSV tem valores como -, o pandas.to_numeric(..., errors="coerce") os transforma automaticamente em NaN (nulo), o que é o comportamento ideal para seus cálculos — ou seja, nenhuma mudança adicional é necessária no trecho que te enviei.
-
-Mas para evitar qualquer ruído nos dados, podemos melhorar o processar_dados() para garantir:
-
-Substituir o texto - por NaN em todo o DataFrame
-
-Converter os dados numéricos com segurança
-
-✅ Versão atualizada de processar_dados com suporte a -:
-python
-Copiar
-Editar
 def processar_dados(df):
     # Corrige nome das colunas
     df.columns = df.columns.str.strip().str.replace("\uFFFD", "", regex=True)
