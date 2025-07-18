@@ -15,6 +15,36 @@ def converter_tempo(ms):
     except:
         return "Inválido"
 
+O ChatGPT disse:
+Perfeito. O erro que você está recebendo:
+
+scss
+Copiar
+Editar
+unsupported operand type(s) for -: 'str' and 'str'
+significa que o código está tentando subtrair strings, não números. Isso ocorre provavelmente nas funções:
+
+python
+Copiar
+Editar
+def calcular_distancia(df):
+    if "TRIP_ODOM(km)" in df.columns:
+        return round(df["TRIP_ODOM(km)"].max() - df["TRIP_ODOM(km)"].min(), 2)
+ou
+
+python
+Copiar
+Editar
+def calcular_consumo(df):
+    if "FUEL_CONSUM" in df.columns:
+        return round(df["FUEL_CONSUM"].max() - df["FUEL_CONSUM"].min(), 2)
+✅ Solução
+Você precisa converter essas colunas para tipo numérico antes de fazer qualquer cálculo. A melhor forma é dentro da função processar_dados.
+
+🛠️ Altere sua função processar_dados para o seguinte:
+python
+Copiar
+Editar
 def processar_dados(df):
     df.columns = df.columns.str.strip().str.replace("\uFFFD", "", regex=True)
 
@@ -27,12 +57,90 @@ def processar_dados(df):
         st.error(f"Coluna 'ENGI_IDLE' não encontrada. Colunas disponíveis: {df.columns.tolist()}")
         st.stop()
 
+    # Corrige valores de ENGI_IDLE
     map_idle = {"Sim": 1, "Não": 0, "Nao": 0, "nao": 0, "não": 0}
     df["ENGI_IDLE"] = df["ENGI_IDLE"].map(map_idle).fillna(0).astype(int)
     df["ACTIVE"] = df["ENGI_IDLE"].apply(lambda x: 0 if x == 1 else 1)
 
-    return df
+    # Conversões numéricas para evitar erro de subtração de strings
+    colunas_numericas = [
+        "TRIP_ODOM(km)", "FUEL_CONSUM", "Litres_Alcohol(L)", "LONGFT1(%)", 
+        "AF_RATIO(:1)", "FUELPW(ms)", "VBAT_1(V)", "FUELLVL(%)"
+    ]
+    for col in colunas_numericas:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
 
+    return df
+Isso garante que as colunas usadas em subtrações e médias sejam tratadas como números (float64) — evitando o erro de subtração de strings.
+
+✅ Depois disso, rode novamente. Se der erro novo, me avise. Caso rode corretamente, posso te ajudar a:
+identificar as viagens no log
+
+calcular consumo por trecho
+
+refinar alertas e gerar insights mais inteligentes
+
+Tudo diretamente com base na sua planilha Forscan.
+
+
+
+
+
+
+
+Você disse:
+lembre-se que nas linhas iniciais, algumas colunas podem estar preenchidas com -
+
+
+O ChatGPT disse:
+Você está dando feedback sobre uma nova versão do ChatGPT.
+Qual resposta você prefere? Elas podem demorar um pouco para carregar.
+ChatGPT
+Resposta 1
+Ótimo lembrete. Quando o CSV tem valores como -, o pandas.to_numeric(..., errors="coerce") os transforma automaticamente em NaN (nulo), o que é o comportamento ideal para seus cálculos — ou seja, nenhuma mudança adicional é necessária no trecho que te enviei.
+
+Mas para evitar qualquer ruído nos dados, podemos melhorar o processar_dados() para garantir:
+
+Substituir o texto - por NaN em todo o DataFrame
+
+Converter os dados numéricos com segurança
+
+✅ Versão atualizada de processar_dados com suporte a -:
+python
+Copiar
+Editar
+def processar_dados(df):
+    # Corrige nome das colunas
+    df.columns = df.columns.str.strip().str.replace("\uFFFD", "", regex=True)
+
+    # Substitui valores "-" por NaN em todo o DataFrame
+    df.replace("-", pd.NA, inplace=True)
+
+    # Converte o tempo
+    if "time(ms)" not in df.columns:
+        st.error(f"Coluna 'time(ms)' não encontrada. Colunas disponíveis: {df.columns.tolist()}")
+        st.stop()
+    df["TIME_CONVERTED"] = df["time(ms)"].apply(converter_tempo)
+
+    # Converte marcha lenta
+    if "ENGI_IDLE" not in df.columns:
+        st.error(f"Coluna 'ENGI_IDLE' não encontrada. Colunas disponíveis: {df.columns.tolist()}")
+        st.stop()
+    map_idle = {"Sim": 1, "Não": 0, "Nao": 0, "nao": 0, "não": 0}
+    df["ENGI_IDLE"] = df["ENGI_IDLE"].map(map_idle).fillna(0).astype(int)
+    df["ACTIVE"] = df["ENGI_IDLE"].apply(lambda x: 0 if x == 1 else 1)
+
+    # Lista de colunas numéricas que você usa nos cálculos
+    colunas_numericas = [
+        "TRIP_ODOM(km)", "FUEL_CONSUM", "Litres_Alcohol(L)", "LONGFT1(%)", 
+        "AF_RATIO(:1)", "FUELPW(ms)", "VBAT_1(V)", "FUELLVL(%)"
+    ]
+    for col in colunas_numericas:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+
+    return df
 def calcular_distancia(df):
     if "TRIP_ODOM(km)" in df.columns:
         return round(df["TRIP_ODOM(km)"].max() - df["TRIP_ODOM(km)"].min(), 2)
