@@ -382,22 +382,24 @@ def avaliar_alertas(df, combustivel):
 
     return alertas
     
+# Upload do arquivo
 uploaded_file = st.file_uploader("📂 Faça upload do arquivo CSV Forscan", type=["csv"])
 
-# Interface após upload
-
 if uploaded_file is not None:
+    # Carrega e processa o dataframe
     df = pd.read_csv(uploaded_file, encoding='utf-8', sep=';')
-    df = processar_dados(df)  # <- Aqui df é definido e processado
+    df = processar_dados(df)
+    
+    # Pergunta o combustível usado
+    tipo_combustivel = st.radio("Qual o combustível usado na viagem?", ["Gasolina", "Etanol"])
+    
     try:
-        # Depois de processar o dataframe
-        df = processar_dados(df)
+        # Gera as estatísticas para todas as colunas relevantes
+        tabela_final = gerar_estatisticas_refinadas_expandido(df, tipo_combustivel.lower())
         
-        # Gera as estatísticas refinadas
-        tabela_final = gerar_estatisticas_refinadas(df, tipo_combustivel)
-        
-        # Exibe na tela
-        st.dataframe(tabela_final)
+        # Exibe as estatísticas
+        st.subheader("📊 Estatísticas Detalhadas por Coluna")
+        st.dataframe(pd.DataFrame(tabela_final), use_container_width=True)
 
 
         # Resumo e métricas
