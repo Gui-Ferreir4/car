@@ -68,6 +68,31 @@ def converter_tempo(ms):
     except:
         return "Inválido"
 
+def valores_ideais_expandido(tipo_combustivel):
+    """Retorna os valores ideais por coluna, com base no tipo de combustível ('gasolina' ou 'etanol')."""
+    gasolina = tipo_combustivel.lower() == 'gasolina'
+
+    return {
+        'RPM': (750, 900) if gasolina else (850, 1000),
+        'MAF(g/s)': (2.0, 4.0) if gasolina else (2.5, 4.5),
+        'MAP(kPa)': (25, 40),
+        'ECT(°C)': (88, 104),
+        'IAT(°C)': (10, 50),  # Pode variar com o ambiente
+        'IGNADV(°)': (5, 20),
+        'LTFT(%)': (-10, 10),
+        'STFT(%)': (-10, 10),
+        'SPEED(km/h)': (0, 0),  # Para marcha lenta
+        'LOAD(%)': (15, 35),
+        'THROTTLE(%)': (10, 20),
+        'O2S_V_B1S1(V)': (0.1, 0.9),  # Varia constantemente
+        'O2S_V_B1S2(V)': (0.4, 0.6),  # Sensor pós-catalisador
+        'FUELLVL(%)': (0, 100),  # Sem faixa ideal, apenas monitorado
+        'FUELSYS1': ('Closed Loop',),  # Esperado em operação normal
+        'OPENLOOP': ('OFF',),  # Esperado em marcha lenta estabilizada
+        'ENGI_IDLE': ('Sim',),  # Usado para filtrar dados
+        'consumo_litros': (0, 20),  # Aproximação geral para consumo por viagem
+    }
+
 # --- Processamento inicial do DataFrame ---
 def processar_dados(df):
     # Limpa espaços e caracteres estranhos das colunas
@@ -176,18 +201,62 @@ def gerar_relatorio_txt(df, df_stats, distancia, consumo, kml, alertas):
         buffer.write(f"   → Mín: {row['Min (Geral)']}, Máx: {row['Max (Geral)']}\n\n")
     return buffer.getvalue()
 
-def gerar_estatisticas_refinadas(df, coluna, tipo_combustivel="gasolina", considerar_idle=False):
-    stats = {
-        "Indicador": coluna,
-        "Descrição": descricao_colunas.get(coluna, "-"),
-        "Valor Ideal Marcha Lenta": "-",
-        "Valor Ideal Atividade": "-",
-        "Min (Geral)": "-",
-        "Max (Geral)": "-",
-        "Média (Geral)": "-",
-        "Média (Marcha Lenta)": "-",
-        "Média (Atividade)": "-"
-    }
+def gerar_estatisticas_refinadas(df, tipo_combustivel):
+    """Gera estatísticas por coluna com validação de valores ideais por tipo de combustível."""
+    limites = valores_ideais_expandido(tipo_combustivel)
+    estatisticas = []
+
+    for col in df.columns:
+        dados_col = df[col].dropna()
+        
+        if dados_col.empty:
+            continue
+
+        valores_ideais = limites.get(col)
+
+        # Colunas numéricas
+        if pd.api.types.is_numeric_dtype(dados_col):
+            minimo = dados_col.min()
+            maximo = dados_col.max()
+            media = dados_col.mean()
+            desvio = dados_col.std()
+
+            if valores_ideais and isinstance(valores_ideais[0], (int, float)):
+                dentro = 'Sim' if valores_ideais[0] <= media <= valores_ideais[1] else 'Não'
+            else:
+                dentro = 'N/A'
+
+            estatisticas.append({
+                'Campo': col,
+                'Mínimo': round(minimo, 2),
+                'Médio': round(media, 2),
+                'Máximo': round(maximo, 2),
+                'Desvio Padrão': round(desvio, 2),
+                'Esperado': f'{valores_ideais}' if valores_ideais else 'N/A',
+                'Dentro do Esperado': dentro
+            })
+
+        # Colunas booleanas ou texto
+        else:
+            top_valor = dados_col.value_counts().idxmax()
+            total = len(dados_col)
+            frequencia = dados_col.value_counts(normalize=True).iloc[0] * 100
+
+            if valores_ideais and isinstance(valores_ideais, tuple):
+                dentro = 'Sim' if top_valor in valores_ideais else 'Não'
+            else:
+                dentro = 'N/A'
+
+            estatisticas.append({
+                'Campo': col,
+                'Valor Mais Frequente': top_valor,
+                'Frequência (%)': round(frequencia, 1),
+                'Esperado': ', '.join(valores_ideais) if valores_ideais else 'N/A',
+                'Dentro do Esperado': dentro
+            })
+
+    return pd.DataFrame(estatisticas)
+
     
     # Função para obter valores ideais segundo a tabela (exemplo simplificado)
     def valores_ideais(col, tipo):
@@ -321,18 +390,15 @@ if uploaded_file is not None:
     df = pd.read_csv(uploaded_file, encoding='utf-8', sep=';')
     df = processar_dados(df)  # <- Aqui df é definido e processado
     try:
-        # Estatísticas detalhadas
-        tabela_final = []
-        for col in df.columns:
-            if col in ["ENGI_IDLE", "ACTIVE", "time(ms)", "TIME_CONVERTED"]:
-                continue
-            considerar_idle = col not in [
-                "ODOMETER(km)", "TRIP_ODOM(km)", "FUELLVL(%)", "VBAT_1(V)", "ENG_STATUS",
-                "AF_LEARN", "MIXCNT_STAT", "OPENLOOP", "time(ms)", "TIME_CONVERTED"
-            ]
-            tabela_final.append(gerar_estatisticas_refinadas(df, col, combustivel.lower(), considerar_idle))
+        # Depois de processar o dataframe
+        df = processar_dados(df)
+        
+        # Gera as estatísticas refinadas
+        tabela_final = gerar_estatisticas_refinadas(df, tipo_combustivel)
+        
+        # Exibe na tela
+        st.dataframe(tabela_final)
 
-        df_stats = pd.DataFrame(tabela_final)
 
         # Resumo e métricas
         st.subheader("📌 Resumo Geral da Viagem")
