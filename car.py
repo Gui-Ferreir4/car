@@ -317,13 +317,10 @@ uploaded_file = st.file_uploader("📂 Faça upload do arquivo CSV Forscan", typ
 
 # Interface após upload
 
-if uploaded_file:
+if uploaded_file is not None:
+    df = pd.read_csv(uploaded_file, encoding='utf-8', sep=';')
+    df = processar_dados(df)  # <- Aqui df é definido e processado
     try:
-        # Leitura já feita na parte 2, então só reaproveitar df
-
-        # Processa dados
-        df = processar_dados(df)
-
         # Estatísticas detalhadas
         tabela_final = []
         for col in df.columns:
