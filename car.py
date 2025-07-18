@@ -38,13 +38,7 @@ Editar
 def calcular_consumo(df):
     if "FUEL_CONSUM" in df.columns:
         return round(df["FUEL_CONSUM"].max() - df["FUEL_CONSUM"].min(), 2)
-✅ Solução
-Você precisa converter essas colunas para tipo numérico antes de fazer qualquer cálculo. A melhor forma é dentro da função processar_dados.
 
-🛠️ Altere sua função processar_dados para o seguinte:
-python
-Copiar
-Editar
 def processar_dados(df):
     df.columns = df.columns.str.strip().str.replace("\uFFFD", "", regex=True)
 
