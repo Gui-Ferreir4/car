@@ -15,26 +15,10 @@ def converter_tempo(ms):
     except:
         return "Inválido"
 
-O ChatGPT disse:
-Perfeito. O erro que você está recebendo:
-
-scss
-Copiar
-Editar
-unsupported operand type(s) for -: 'str' and 'str'
-significa que o código está tentando subtrair strings, não números. Isso ocorre provavelmente nas funções:
-
-python
-Copiar
-Editar
 def calcular_distancia(df):
     if "TRIP_ODOM(km)" in df.columns:
         return round(df["TRIP_ODOM(km)"].max() - df["TRIP_ODOM(km)"].min(), 2)
-ou
 
-python
-Copiar
-Editar
 def calcular_consumo(df):
     if "FUEL_CONSUM" in df.columns:
         return round(df["FUEL_CONSUM"].max() - df["FUEL_CONSUM"].min(), 2)
