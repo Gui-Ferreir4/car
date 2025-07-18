@@ -7,8 +7,7 @@ from io import StringIO
 st.set_page_config(page_title="Análise Forscan Lite", layout="wide")
 st.title("🔍 Análise Forscan Lite - Consumo e Desempenho")
 
-def gerar_txt_analise(df):
-    # Dicionário com nomes legíveis das colunas
+# Dicionário com nomes legíveis das colunas
     descricao_colunas = {
         "time(ms)": "Tempo desde o início da gravação (ms)",
         "ENGI_IDLE": "Motor em marcha lenta (1 = Sim, 0 = Não)",
@@ -52,6 +51,8 @@ def gerar_txt_analise(df):
         "MIXCNT_STAT": "Status da mistura"
     }
 
+
+def gerar_txt_analise(df):
     # Cria texto com análise estatística simples
     texto = "Análise Estatística por Condição:\n\n"
 
