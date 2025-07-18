@@ -7,82 +7,50 @@ from io import StringIO
 st.set_page_config(page_title="Análise Forscan Lite", layout="wide")
 st.title("🔍 Análise Forscan Lite - Consumo e Desempenho")
 
-# Dicionário com nomes legíveis das colunas
+# Dicionário com descrições das colunas
 descricao_colunas = {
-        "time(ms)": "Tempo desde o início da gravação (ms)",
-        "ENGI_IDLE": "Motor em marcha lenta (1 = Sim, 0 = Não)",
-        "IC_SPDMTR(km/h)": "Velocidade registrada no painel",
-        "VSS(km/h)": "Velocidade do sensor de roda",
-        "RPM(1/min)": "Rotações por minuto do motor",
-        "ODOMETER(km)": "Odômetro total (km)",
-        "TRIP_ODOM(km)": "Odômetro parcial (km percorridos na viagem)",
-        "DSDRPM(1/min)": "RPM desejado pela ECU",
-        "BOO_ABS": "Pedal do freio pressionado",
-        "AF_RATIO(:1)": "Razão ar/combustível",
-        "SHRTFT1(%)": "Correção de combustível em curto prazo",
-        "LONGFT1(%)": "Correção de combustível em longo prazo",
-        "FUELPW(ms)": "Tempo de injeção de combustível",
-        "FUELLVL(%)": "Nível de combustível no tanque",
-        "LOAD.OBDII(%)": "Carga do motor (via OBDII)",
-        "ECT_GAUGE(Â°C)": "Temperatura do motor no painel",
-        "IAT(Â°C)": "Temperatura do ar admitido",
-        "O2S11_V(V)": "Tensão do sensor de oxigênio",
-        "LMD_EGO1(:1)": "Leitura lambda estimada",
-        "OPENLOOP": "Sistema de injeção em malha aberta (sem correção por sonda)",
-        "MAP.OBDII(kPa)": "Pressão absoluta do coletor (OBDII)",
-        "BARO(kPa)": "Pressão atmosférica",
-        "TP.OBDII(%)": "Posição da borboleta do acelerador",
-        "SPARKADV(Â°)": "Avanço da ignição",
-        "VBAT_1(V)": "Voltagem da bateria",
-        "AF_LEARN": "Aprendizado de mistura ar/combustível",
-        "ECT(Â°C)": "Temperatura real do motor",
-        "ECT.OBDII(Â°C)": "Temperatura via OBDII",
-        "FUEL_CONSUM": "Combustível consumido acumulado",
-        "FUEL_CORR(:1)": "Correção da mistura combustível",
-        "Litres_Alcohol(L)": "Álcool consumido na viagem",
-        "MAP(V)": "Pressão do coletor (em volts)",
-        "MAP_V(V)": "Pressão do coletor (outro sensor, em volts)",
-        "SPKDUR_1(ms)": "Duração da centelha - Cilindro 1",
-        "SPKDUR_2(ms)": "Duração da centelha - Cilindro 2",
-        "SPKDUR_3(ms)": "Duração da centelha - Cilindro 3",
-        "SPKDUR_4(ms)": "Duração da centelha - Cilindro 4",
-        "ENG_STATUS": "Status geral do motor",
-        "LAMBDA_1": "Leitura da sonda lambda",
-        "MIXCNT_STAT": "Status da mistura"
-    }
+    "time(ms)": "Tempo desde o início da gravação (ms)",
+    "ENGI_IDLE": "Motor em marcha lenta (1 = Sim, 0 = Não)",
+    "IC_SPDMTR(km/h)": "Velocidade registrada no painel",
+    "VSS(km/h)": "Velocidade do sensor de roda",
+    "RPM(1/min)": "Rotações por minuto do motor",
+    "ODOMETER(km)": "Odômetro total (km)",
+    "TRIP_ODOM(km)": "Odômetro parcial (km percorridos na viagem)",
+    "DSDRPM(1/min)": "RPM desejado pela ECU",
+    "BOO_ABS": "Pedal do freio pressionado",
+    "AF_RATIO(:1)": "Razão ar/combustível",
+    "SHRTFT1(%)": "Correção de combustível em curto prazo",
+    "LONGFT1(%)": "Correção de combustível em longo prazo",
+    "FUELPW(ms)": "Tempo de injeção de combustível",
+    "FUELLVL(%)": "Nível de combustível no tanque",
+    "LOAD.OBDII(%)": "Carga do motor (via OBDII)",
+    "ECT_GAUGE(Â°C)": "Temperatura do motor no painel",
+    "IAT(Â°C)": "Temperatura do ar admitido",
+    "O2S11_V(V)": "Tensão do sensor de oxigênio",
+    "LMD_EGO1(:1)": "Leitura lambda estimada",
+    "OPENLOOP": "Sistema de injeção em malha aberta (sem correção por sonda)",
+    "MAP.OBDII(kPa)": "Pressão absoluta do coletor (OBDII)",
+    "BARO(kPa)": "Pressão atmosférica",
+    "TP.OBDII(%)": "Posição da borboleta do acelerador",
+    "SPARKADV(Â°)": "Avanço da ignição",
+    "VBAT_1(V)": "Voltagem da bateria",
+    "AF_LEARN": "Aprendizado de mistura ar/combustível",
+    "ECT(Â°C)": "Temperatura real do motor",
+    "ECT.OBDII(Â°C)": "Temperatura via OBDII",
+    "FUEL_CONSUM": "Combustível consumido acumulado",
+    "FUEL_CORR(:1)": "Correção da mistura combustível",
+    "Litres_Alcohol(L)": "Álcool consumido na viagem",
+    "MAP(V)": "Pressão do coletor (em volts)",
+    "MAP_V(V)": "Pressão do coletor (outro sensor, em volts)",
+    "SPKDUR_1(ms)": "Duração da centelha - Cilindro 1",
+    "SPKDUR_2(ms)": "Duração da centelha - Cilindro 2",
+    "SPKDUR_3(ms)": "Duração da centelha - Cilindro 3",
+    "SPKDUR_4(ms)": "Duração da centelha - Cilindro 4",
+    "ENG_STATUS": "Status geral do motor",
+    "LAMBDA_1": "Leitura da sonda lambda",
+    "MIXCNT_STAT": "Status da mistura"
+}
 
-
-def gerar_txt_analise(df):
-    # Cria texto com análise estatística simples
-    texto = "Análise Estatística por Condição:\n\n"
-
-    for condicao, grupo in df.groupby("ENGI_IDLE"):
-        if grupo.empty:
-            continue
-        nome_condicao = "Marcha Lenta" if condicao == "Sim" else "Em Movimento"
-        texto += f"\n🔹 {nome_condicao}:\n"
-        texto += "-" * 40 + "\n"
-
-        colunas_numericas = grupo.select_dtypes(include="number").columns
-
-        for col in colunas_numericas:
-            if col not in descricao_colunas:
-                continue
-
-            valores = grupo[col].dropna()
-            if valores.empty:
-                continue
-
-            minimo = round(valores.min(), 2)
-            maximo = round(valores.max(), 2)
-            media = round(valores.mean(), 2)
-            texto += f"{descricao_colunas[col]}:\n"
-            texto += f"   Mínimo: {minimo} | Máximo: {maximo} | Média: {media}\n"
-
-        texto += "\n"
-
-    return texto
-    
 # Funções utilitárias
 def converter_tempo(ms):
     try:
@@ -90,14 +58,6 @@ def converter_tempo(ms):
         return str(timedelta(seconds=segundos))
     except:
         return "Inválido"
-
-def calcular_distancia(df):
-    if "TRIP_ODOM(km)" in df.columns:
-        return round(df["TRIP_ODOM(km)"].max() - df["TRIP_ODOM(km)"].min(), 2)
-
-def calcular_consumo(df):
-    if "FUEL_CONSUM" in df.columns:
-        return round(df["FUEL_CONSUM"].max() - df["FUEL_CONSUM"].min(), 2)
 
 def processar_dados(df):
     df.columns = df.columns.str.strip().str.replace("\uFFFD", "", regex=True)
@@ -111,22 +71,18 @@ def processar_dados(df):
         st.error(f"Coluna 'ENGI_IDLE' não encontrada. Colunas disponíveis: {df.columns.tolist()}")
         st.stop()
 
-    # Corrige valores de ENGI_IDLE
+    # Mapeia "Sim"/"Não" para 1/0
     map_idle = {"Sim": 1, "Não": 0, "Nao": 0, "nao": 0, "não": 0}
     df["ENGI_IDLE"] = df["ENGI_IDLE"].map(map_idle).fillna(0).astype(int)
     df["ACTIVE"] = df["ENGI_IDLE"].apply(lambda x: 0 if x == 1 else 1)
 
-    # Conversões numéricas para evitar erro de subtração de strings
-    colunas_numericas = [
-        "TRIP_ODOM(km)", "FUEL_CONSUM", "Litres_Alcohol(L)", "LONGFT1(%)", 
-        "AF_RATIO(:1)", "FUELPW(ms)", "VBAT_1(V)", "FUELLVL(%)"
-    ]
+    # Substitui "-" e strings vazias por NaN para todas as colunas numéricas conhecidas
+    colunas_numericas = [col for col in df.columns if col in descricao_colunas]
     for col in colunas_numericas:
-        if col in df.columns:
-            df[col] = pd.to_numeric(df[col], errors="coerce")
+        df[col] = df[col].replace(["-", ""], pd.NA)
+        df[col] = pd.to_numeric(df[col], errors='coerce')
 
     return df
-
 
 def calcular_distancia(df):
     if "TRIP_ODOM(km)" in df.columns:
@@ -146,19 +102,22 @@ def calcular_kml(distancia, consumo):
     return None
 
 def gerar_estatisticas(df, coluna, considerar_idle=False):
+    # Converte coluna para numérico (pode ser redundante mas garante segurança)
+    serie = pd.to_numeric(df[coluna], errors='coerce')
+
     stats = {
         "Indicador": coluna,
         "Descrição": descricao_colunas.get(coluna, "-")
     }
 
-    geral = df[coluna].dropna()
+    geral = serie.dropna()
     stats["Min (Geral)"] = round(geral.min(), 2) if not geral.empty else "-"
     stats["Max (Geral)"] = round(geral.max(), 2) if not geral.empty else "-"
     stats["Média (Geral)"] = round(geral.mean(), 2) if not geral.empty else "-"
 
     if considerar_idle:
-        idle = df[df["ENGI_IDLE"] == 1][coluna].dropna()
-        ativo = df[df["ENGI_IDLE"] == 0][coluna].dropna()
+        idle = pd.to_numeric(df[df["ENGI_IDLE"] == 1][coluna], errors='coerce').dropna()
+        ativo = pd.to_numeric(df[df["ENGI_IDLE"] == 0][coluna], errors='coerce').dropna()
         stats["Média (Marcha Lenta)"] = round(idle.mean(), 2) if not idle.empty else "-"
         stats["Média (Atividade)"] = round(ativo.mean(), 2) if not ativo.empty else "-"
     else:
@@ -223,14 +182,12 @@ uploaded_file = st.file_uploader("📎 Selecione o arquivo CSV exportado do Fors
 
 if uploaded_file:
     try:
-        # leitura inicial do conteúdo
         content = uploaded_file.read().decode("utf-8")
         df = pd.read_csv(StringIO(content), sep=";")
         st.success("✅ Arquivo carregado com sucesso!")
 
         df = processar_dados(df)
 
-        # Seção de Resumo
         st.subheader("📌 Resumo Geral da Viagem")
         distancia = calcular_distancia(df)
         consumo = calcular_consumo(df)
@@ -241,7 +198,6 @@ if uploaded_file:
         col2.metric("Consumo (L)", consumo or "N/A")
         col3.metric("Consumo Médio (km/L)", kml or "N/A")
 
-        # Estatísticas Detalhadas
         st.markdown("---")
         st.subheader("📊 Estatísticas Detalhadas por Coluna")
 
@@ -258,7 +214,6 @@ if uploaded_file:
         df_stats = pd.DataFrame(tabela_final)
         st.dataframe(df_stats, use_container_width=True)
 
-        # Alertas
         st.markdown("---")
         st.subheader("🚨 Alertas de Desempenho")
         alertas = avaliar_alertas(df)
@@ -268,7 +223,6 @@ if uploaded_file:
         else:
             st.success("✅ Nenhum alerta crítico identificado.")
 
-        # Relatório TXT
         st.markdown("---")
         st.subheader("📄 Relatório Consolidado (.txt)")
         relatorio_txt = gerar_relatorio_txt(df, df_stats, distancia, consumo, kml, alertas)
