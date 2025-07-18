@@ -8,7 +8,7 @@ st.set_page_config(page_title="Análise Forscan Lite", layout="wide")
 st.title("🔍 Análise Forscan Lite - Consumo e Desempenho")
 
 # Dicionário com nomes legíveis das colunas
-    descricao_colunas = {
+descricao_colunas = {
         "time(ms)": "Tempo desde o início da gravação (ms)",
         "ENGI_IDLE": "Motor em marcha lenta (1 = Sim, 0 = Não)",
         "IC_SPDMTR(km/h)": "Velocidade registrada no painel",
