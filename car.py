@@ -8,7 +8,8 @@ st.set_page_config(page_title="Análise Forscan Lite", layout="wide")
 st.title("🔍 Análise Forscan Lite - Consumo e Desempenho")
 
 def gerar_txt_analise(df):
-    escricao_colunas = {
+    # Dicionário com nomes legíveis das colunas
+    descricao_colunas = {
         "time(ms)": "Tempo desde o início da gravação (ms)",
         "ENGI_IDLE": "Motor em marcha lenta (1 = Sim, 0 = Não)",
         "IC_SPDMTR(km/h)": "Velocidade registrada no painel",
@@ -50,6 +51,37 @@ def gerar_txt_analise(df):
         "LAMBDA_1": "Leitura da sonda lambda",
         "MIXCNT_STAT": "Status da mistura"
     }
+
+    # Cria texto com análise estatística simples
+    texto = "Análise Estatística por Condição:\n\n"
+
+    for condicao, grupo in df.groupby("ENGI_IDLE"):
+        if grupo.empty:
+            continue
+        nome_condicao = "Marcha Lenta" if condicao == "Sim" else "Em Movimento"
+        texto += f"\n🔹 {nome_condicao}:\n"
+        texto += "-" * 40 + "\n"
+
+        colunas_numericas = grupo.select_dtypes(include="number").columns
+
+        for col in colunas_numericas:
+            if col not in descricao_colunas:
+                continue
+
+            valores = grupo[col].dropna()
+            if valores.empty:
+                continue
+
+            minimo = round(valores.min(), 2)
+            maximo = round(valores.max(), 2)
+            media = round(valores.mean(), 2)
+            texto += f"{descricao_colunas[col]}:\n"
+            texto += f"   Mínimo: {minimo} | Máximo: {maximo} | Média: {media}\n"
+
+        texto += "\n"
+
+    return texto
+    
 # Funções utilitárias
 def converter_tempo(ms):
     try:
@@ -94,37 +126,7 @@ def processar_dados(df):
 
     return df
 
-def processar_dados(df):
-    # Corrige nome das colunas
-    df.columns = df.columns.str.strip().str.replace("\uFFFD", "", regex=True)
 
-    # Substitui valores "-" por NaN em todo o DataFrame
-    df.replace("-", pd.NA, inplace=True)
-
-    # Converte o tempo
-    if "time(ms)" not in df.columns:
-        st.error(f"Coluna 'time(ms)' não encontrada. Colunas disponíveis: {df.columns.tolist()}")
-        st.stop()
-    df["TIME_CONVERTED"] = df["time(ms)"].apply(converter_tempo)
-
-    # Converte marcha lenta
-    if "ENGI_IDLE" not in df.columns:
-        st.error(f"Coluna 'ENGI_IDLE' não encontrada. Colunas disponíveis: {df.columns.tolist()}")
-        st.stop()
-    map_idle = {"Sim": 1, "Não": 0, "Nao": 0, "nao": 0, "não": 0}
-    df["ENGI_IDLE"] = df["ENGI_IDLE"].map(map_idle).fillna(0).astype(int)
-    df["ACTIVE"] = df["ENGI_IDLE"].apply(lambda x: 0 if x == 1 else 1)
-
-    # Lista de colunas numéricas que você usa nos cálculos
-    colunas_numericas = [
-        "TRIP_ODOM(km)", "FUEL_CONSUM", "Litres_Alcohol(L)", "LONGFT1(%)", 
-        "AF_RATIO(:1)", "FUELPW(ms)", "VBAT_1(V)", "FUELLVL(%)"
-    ]
-    for col in colunas_numericas:
-        if col in df.columns:
-            df[col] = pd.to_numeric(df[col], errors="coerce")
-
-    return df
 def calcular_distancia(df):
     if "TRIP_ODOM(km)" in df.columns:
         return round(df["TRIP_ODOM(km)"].max() - df["TRIP_ODOM(km)"].min(), 2)
