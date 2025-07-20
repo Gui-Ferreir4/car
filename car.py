@@ -19,7 +19,7 @@ if uploaded_file is not None:
         df = processar_dados(df)
 
         # Pergunta o combustível usado
-        tipo_combustivel = st.radio("Qual o combustível usado na viagem?", ["Gasolina", "Etanol"])
+        #tipo_combustivel = st.radio("Qual o combustível usado na viagem?", ["Gasolina", "Etanol"])
 
         # Gera as estatísticas refinadas
         tabela_final = gerar_estatisticas_refinadas_expandido(df, tipo_combustivel.lower())
